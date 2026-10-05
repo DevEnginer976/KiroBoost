@@ -5,7 +5,7 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.KeyMapping;
-import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.Component;
 import org.lwjgl.glfw.GLFW;
 
 public class KiroBoostClient implements ClientModInitializer {
@@ -24,7 +24,7 @@ public class KiroBoostClient implements ClientModInitializer {
                 new KeyMapping(
                         "key.kiroboost.toggle",
                         GLFW.GLFW_KEY_F8,
-                        "category.kiroboost"
+                        KeyMapping.Category.MISC
                 )
         );
 
@@ -54,7 +54,7 @@ public class KiroBoostClient implements ClientModInitializer {
 
         if (client.player != null) {
             client.player.displayClientMessage(
-                    net.minecraft.network.chat.Component.literal(
+                    Component.literal(
                             "§a[KiroBoost] §fModo Low-End §aACTIVADO"
                     ),
                     true
@@ -67,7 +67,7 @@ public class KiroBoostClient implements ClientModInitializer {
 
         if (client.player != null) {
             client.player.displayClientMessage(
-                    net.minecraft.network.chat.Component.literal(
+                    Component.literal(
                             "§c[KiroBoost] §fModo Low-End §cDESACTIVADO"
                     ),
                     true
