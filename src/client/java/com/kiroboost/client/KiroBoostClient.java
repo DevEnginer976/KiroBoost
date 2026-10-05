@@ -10,8 +10,8 @@ import org.lwjgl.glfw.GLFW;
 
 public class KiroBoostClient implements ClientModInitializer {
 
-    private static boolean lowEndMode = false;
-    private static boolean ultraLowEndMode = false;
+    public static boolean lowEndMode = false;
+    public static boolean ultraLowEndMode = false;
 
     private static int tickCounter = 0;
 
@@ -26,9 +26,6 @@ public class KiroBoostClient implements ClientModInitializer {
         System.out.println("[KiroBoost] KiroBoost V2 iniciado.");
         System.out.println("[KiroBoost] ============================");
 
-        /*
-         * TECLA LOW-END
-         */
         lowEndKey = KeyBindingHelper.registerKeyBinding(
                 new KeyMapping(
                         "key.kiroboost.low_end",
@@ -37,9 +34,6 @@ public class KiroBoostClient implements ClientModInitializer {
                 )
         );
 
-        /*
-         * TECLA ULTRA LOW-END
-         */
         ultraKey = KeyBindingHelper.registerKeyBinding(
                 new KeyMapping(
                         "key.kiroboost.ultra_low_end",
@@ -48,9 +42,6 @@ public class KiroBoostClient implements ClientModInitializer {
                 )
         );
 
-        /*
-         * TECLA ESTADÍSTICAS
-         */
         statsKey = KeyBindingHelper.registerKeyBinding(
                 new KeyMapping(
                         "key.kiroboost.stats",
@@ -59,145 +50,88 @@ public class KiroBoostClient implements ClientModInitializer {
                 )
         );
 
-        /*
-         * TICK DEL CLIENTE
-         */
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
 
-            /*
-             * F8
-             */
             while (lowEndKey.consumeClick()) {
-
-                lowEndMode = !lowEndMode;
-
-                if (lowEndMode) {
-                    enableLowEnd(client);
-                } else {
-                    disableLowEnd(client);
-                }
+                toggleLowEnd(client);
             }
 
-            /*
-             * F9
-             */
             while (ultraKey.consumeClick()) {
-
-                ultraLowEndMode = !ultraLowEndMode;
-
-                if (ultraLowEndMode) {
-                    enableUltraLowEnd(client);
-                } else {
-                    disableUltraLowEnd(client);
-                }
+                toggleUltraLowEnd(client);
             }
 
-            /*
-             * F7
-             */
             while (statsKey.consumeClick()) {
                 showStats(client);
             }
 
-            /*
-             * Estadísticas automáticas cada 10 segundos
-             */
             tickCounter++;
 
             if (tickCounter >= 200) {
-
                 tickCounter = 0;
-
                 printStats(client);
             }
         });
     }
 
-    /*
-     * =========================
-     * LOW-END
-     * =========================
-     */
+    private static void toggleLowEnd(Minecraft client) {
 
-    private static void enableLowEnd(Minecraft client) {
+        lowEndMode = !lowEndMode;
 
-        System.out.println(
-                "[KiroBoost] Modo Low-End ACTIVADO."
-        );
+        if (lowEndMode) {
 
-        if (client.player != null) {
+            ultraLowEndMode = false;
 
-            client.player.displayClientMessage(
-                    Component.literal(
-                            "§a[KiroBoost] §fModo Low-End §aACTIVADO"
-                    ),
-                    true
+            notify(
+                    client,
+                    "§a[KiroBoost] §fLow-End §aACTIVADO"
+            );
+
+            System.out.println(
+                    "[KiroBoost] Low-End ACTIVADO"
+            );
+
+        } else {
+
+            notify(
+                    client,
+                    "§c[KiroBoost] §fLow-End §cDESACTIVADO"
+            );
+
+            System.out.println(
+                    "[KiroBoost] Low-End DESACTIVADO"
             );
         }
     }
 
-    private static void disableLowEnd(Minecraft client) {
+    private static void toggleUltraLowEnd(Minecraft client) {
 
-        System.out.println(
-                "[KiroBoost] Modo Low-End DESACTIVADO."
-        );
+        ultraLowEndMode = !ultraLowEndMode;
 
-        if (client.player != null) {
+        if (ultraLowEndMode) {
 
-            client.player.displayClientMessage(
-                    Component.literal(
-                            "§c[KiroBoost] §fModo Low-End §cDESACTIVADO"
-                    ),
-                    true
+            lowEndMode = false;
+
+            notify(
+                    client,
+                    "§b[KiroBoost] §fUltra Low-End §bACTIVADO"
+            );
+
+            System.out.println(
+                    "[KiroBoost] Ultra Low-End ACTIVADO"
+            );
+
+        } else {
+
+            notify(
+                    client,
+                    "§e[KiroBoost] §fUltra Low-End §eDESACTIVADO"
+            );
+
+            System.out.println(
+                    "[KiroBoost] Ultra Low-End DESACTIVADO"
             );
         }
     }
-
-    /*
-     * =========================
-     * ULTRA LOW-END
-     * =========================
-     */
-
-    private static void enableUltraLowEnd(Minecraft client) {
-
-        System.out.println(
-                "[KiroBoost] Modo Ultra Low-End ACTIVADO."
-        );
-
-        if (client.player != null) {
-
-            client.player.displayClientMessage(
-                    Component.literal(
-                            "§b[KiroBoost] §fUltra Low-End §bACTIVADO"
-                    ),
-                    true
-            );
-        }
-    }
-
-    private static void disableUltraLowEnd(Minecraft client) {
-
-        System.out.println(
-                "[KiroBoost] Modo Ultra Low-End DESACTIVADO."
-        );
-
-        if (client.player != null) {
-
-            client.player.displayClientMessage(
-                    Component.literal(
-                            "§e[KiroBoost] §fUltra Low-End §eDESACTIVADO"
-                    ),
-                    true
-            );
-        }
-    }
-
-    /*
-     * =========================
-     * ESTADÍSTICAS
-     * =========================
-     */
 
     private static void showStats(Minecraft client) {
 
@@ -219,32 +153,51 @@ public class KiroBoostClient implements ClientModInitializer {
 
             client.player.displayClientMessage(
                     Component.literal(
-                            "§6KiroBoost §8» "
-                                    + "§fFPS: §a"
+                            "§6§lKiroBoost §8» "
+                                    + "§fFPS §a"
                                     + client.getFps()
                                     + " §8| "
-                                    + "§fRAM: §b"
+                                    + "§fRAM §b"
                                     + usedMemory
                                     + "MB"
-                                    + " §8/ §b"
+                                    + "§7/"
                                     + maxMemory
                                     + "MB"
                                     + " §8| "
-                                    + "§fLow-End: "
-                                    + (lowEndMode
-                                    ? "§aON"
-                                    : "§cOFF")
+                                    + "§fModo "
+                                    + getModeName()
                     ),
                     false
             );
         }
     }
 
-    /*
-     * =========================
-     * LOG
-     * =========================
-     */
+    private static void notify(
+            Minecraft client,
+            String message
+    ) {
+
+        if (client.player != null) {
+
+            client.player.displayClientMessage(
+                    Component.literal(message),
+                    true
+            );
+        }
+    }
+
+    private static String getModeName() {
+
+        if (ultraLowEndMode) {
+            return "§bUltra Low-End";
+        }
+
+        if (lowEndMode) {
+            return "§aLow-End";
+        }
+
+        return "§7Normal";
+    }
 
     private static void printStats(Minecraft client) {
 
@@ -263,21 +216,15 @@ public class KiroBoostClient implements ClientModInitializer {
                 totalMemory - freeMemory;
 
         System.out.println(
-                "[KiroBoost] FPS: "
+                "[KiroBoost] FPS="
                         + client.getFps()
-                        + " | RAM: "
+                        + " | RAM="
                         + usedMemory
-                        + " MB / "
+                        + "MB/"
                         + maxMemory
-                        + " MB"
-                        + " | Low-End: "
-                        + (lowEndMode
-                        ? "ON"
-                        : "OFF")
-                        + " | Ultra: "
-                        + (ultraLowEndMode
-                        ? "ON"
-                        : "OFF")
+                        + "MB"
+                        + " | MODE="
+                        + getModeName()
         );
     }
 }
