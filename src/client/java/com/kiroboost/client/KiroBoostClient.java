@@ -13,6 +13,9 @@ public class KiroBoostClient implements ClientModInitializer {
     public static boolean lowEndMode = false;
     public static boolean ultraLowEndMode = false;
 
+    private static int originalRenderDistance = -1;
+    private static int originalSimulationDistance = -1;
+
     private static int tickCounter = 0;
 
     private static KeyMapping lowEndKey;
@@ -22,9 +25,7 @@ public class KiroBoostClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
 
-        System.out.println("[KiroBoost] ============================");
         System.out.println("[KiroBoost] KiroBoost V2 iniciado.");
-        System.out.println("[KiroBoost] ============================");
 
         lowEndKey = KeyBindingHelper.registerKeyBinding(
                 new KeyMapping(
@@ -73,6 +74,19 @@ public class KiroBoostClient implements ClientModInitializer {
         });
     }
 
+    private static void saveOriginalSettings(Minecraft client) {
+
+        if (originalRenderDistance == -1) {
+            originalRenderDistance =
+                    client.options.renderDistance().get();
+        }
+
+        if (originalSimulationDistance == -1) {
+            originalSimulationDistance =
+                    client.options.simulationDistance().get();
+        }
+    }
+
     private static void toggleLowEnd(Minecraft client) {
 
         lowEndMode = !lowEndMode;
@@ -81,24 +95,22 @@ public class KiroBoostClient implements ClientModInitializer {
 
             ultraLowEndMode = false;
 
+            saveOriginalSettings(client);
+
+            applyLowEndSettings(client);
+
             notify(
                     client,
                     "§a[KiroBoost] §fLow-End §aACTIVADO"
             );
 
-            System.out.println(
-                    "[KiroBoost] Low-End ACTIVADO"
-            );
-
         } else {
+
+            restoreSettings(client);
 
             notify(
                     client,
                     "§c[KiroBoost] §fLow-End §cDESACTIVADO"
-            );
-
-            System.out.println(
-                    "[KiroBoost] Low-End DESACTIVADO"
             );
         }
     }
@@ -111,26 +123,90 @@ public class KiroBoostClient implements ClientModInitializer {
 
             lowEndMode = false;
 
+            saveOriginalSettings(client);
+
+            applyUltraLowEndSettings(client);
+
             notify(
                     client,
                     "§b[KiroBoost] §fUltra Low-End §bACTIVADO"
             );
 
-            System.out.println(
-                    "[KiroBoost] Ultra Low-End ACTIVADO"
-            );
-
         } else {
+
+            restoreSettings(client);
 
             notify(
                     client,
                     "§e[KiroBoost] §fUltra Low-End §eDESACTIVADO"
             );
+        }
+    }
 
-            System.out.println(
-                    "[KiroBoost] Ultra Low-End DESACTIVADO"
+    private static void applyLowEndSettings(Minecraft client) {
+
+        client.options.renderDistance().set(
+                Math.min(
+                        client.options.renderDistance().get(),
+                        10
+                )
+        );
+
+        client.options.simulationDistance().set(
+                Math.min(
+                        client.options.simulationDistance().get(),
+                        6
+                )
+        );
+
+        System.out.println(
+                "[KiroBoost] Perfil Low-End aplicado."
+        );
+    }
+
+    private static void applyUltraLowEndSettings(Minecraft client) {
+
+        client.options.renderDistance().set(
+                Math.min(
+                        client.options.renderDistance().get(),
+                        6
+                )
+        );
+
+        client.options.simulationDistance().set(
+                Math.min(
+                        client.options.simulationDistance().get(),
+                        4
+                )
+        );
+
+        System.out.println(
+                "[KiroBoost] Perfil Ultra Low-End aplicado."
+        );
+    }
+
+    private static void restoreSettings(Minecraft client) {
+
+        if (originalRenderDistance != -1) {
+
+            client.options.renderDistance().set(
+                    originalRenderDistance
             );
         }
+
+        if (originalSimulationDistance != -1) {
+
+            client.options.simulationDistance().set(
+                    originalSimulationDistance
+            );
+        }
+
+        originalRenderDistance = -1;
+        originalSimulationDistance = -1;
+
+        System.out.println(
+                "[KiroBoost] Configuración original restaurada."
+        );
     }
 
     private static void showStats(Minecraft client) {
@@ -164,8 +240,11 @@ public class KiroBoostClient implements ClientModInitializer {
                                     + maxMemory
                                     + "MB"
                                     + " §8| "
-                                    + "§fModo "
-                                    + getModeName()
+                                    + "§fRender §e"
+                                    + client.options.renderDistance().get()
+                                    + " §8| "
+                                    + "§fSim §e"
+                                    + client.options.simulationDistance().get()
                     ),
                     false
             );
@@ -184,19 +263,6 @@ public class KiroBoostClient implements ClientModInitializer {
                     true
             );
         }
-    }
-
-    private static String getModeName() {
-
-        if (ultraLowEndMode) {
-            return "§bUltra Low-End";
-        }
-
-        if (lowEndMode) {
-            return "§aLow-End";
-        }
-
-        return "§7Normal";
     }
 
     private static void printStats(Minecraft client) {
@@ -223,8 +289,10 @@ public class KiroBoostClient implements ClientModInitializer {
                         + "MB/"
                         + maxMemory
                         + "MB"
-                        + " | MODE="
-                        + getModeName()
+                        + " | Render="
+                        + client.options.renderDistance().get()
+                        + " | Simulation="
+                        + client.options.simulationDistance().get()
         );
     }
 }
